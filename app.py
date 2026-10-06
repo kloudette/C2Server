@@ -65,6 +65,17 @@ def trigger_clear():
     pending_command = None
     return {"status": "cleared"}
 
+@app.get("/command")
+def get_pending_command(authorization: str = Header(None)):
+    global pending_command
+    if authorization != SECRET_KEY:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    active_cmd = pending_command
+    pending_command = None  # Consume and clear command
+
+    return {"command": active_cmd}
+
 @app.get("/", response_class=HTMLResponse)
 def dashboard():
     files = sorted(os.listdir(UPLOAD_DIR), reverse=True)
